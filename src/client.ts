@@ -21,6 +21,7 @@ export class DolanPredictionClient {
 
   private readonly listeners: Map<EventType, Set<EventCallback<any>>> = new Map()
   private readonly lastKnownStates: Map<number, number> = new Map()
+  private readonly watchedRounds: Set<number> = new Set()
   private pollTimer: ReturnType<typeof setInterval> | null = null
   private priceUnsub: (() => void) | null = null
 
@@ -69,7 +70,9 @@ export class DolanPredictionClient {
 
   async placeBet(roundId: number, direction: BetDirection, amountMicroAlgo: number): Promise<string> {
     const { signer, address } = this.requireSigner()
-    return placeBet(this.algod, signer, address, roundId, direction, amountMicroAlgo, this.predictionAppId)
+    const txId = await placeBet(this.algod, signer, address, roundId, direction, amountMicroAlgo, this.predictionAppId)
+    this.watchedRounds.add(roundId)
+    return txId
   }
 
   async getBet(roundId: number, address?: string): Promise<Bet | null> {
@@ -161,6 +164,7 @@ export class DolanPredictionClient {
       this.priceUnsub = null
     }
     this.lastKnownStates.clear()
+    this.watchedRounds.clear()
   }
 
   private async pollTick(): Promise<void> {
@@ -169,7 +173,11 @@ export class DolanPredictionClient {
       if (currentId === 0) return
 
       const start = Math.max(1, currentId - 2)
-      for (let i = start; i <= currentId; i++) {
+      const pollIds = new Set<number>()
+      for (let i = start; i <= currentId; i++) pollIds.add(i)
+      for (const id of this.watchedRounds) pollIds.add(id)
+
+      for (const i of pollIds) {
         const round = await this.getRound(i)
         if (!round) continue
 
@@ -177,13 +185,16 @@ export class DolanPredictionClient {
         if (prevStatus !== round.status) {
           if (round.status === 1) this.emit('roundOpened', round)
           if (round.status === 2) this.emit('roundLocked', round)
-          if (round.status === 3) this.emit('roundSettled', round)
+          if (round.status === 3) {
+            this.emit('roundSettled', round)
+            this.watchedRounds.delete(i)
+          }
           this.lastKnownStates.set(i, round.status)
         }
       }
 
       for (const id of this.lastKnownStates.keys()) {
-        if (id < currentId - 10) this.lastKnownStates.delete(id)
+        if (id < currentId - 10 && !this.watchedRounds.has(id)) this.lastKnownStates.delete(id)
       }
     } catch {}
   }
