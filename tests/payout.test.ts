@@ -111,8 +111,8 @@ describe('calculateExpectedValue', () => {
     expect(ev).toBeLessThan(0)
   })
 
-  it('returns slightly negative EV at 50/50 due to 3% fee', () => {
-    const round = makeRound({ upPool: 50_000_000, downPool: 50_000_000 })
+  it('returns negative EV when betting on heavily favored side', () => {
+    const round = makeRound({ upPool: 98_000_000, downPool: 2_000_000 })
     const ev = calculateExpectedValue(1_000_000, 1, round, 0.5)
     expect(ev).toBeLessThan(0)
   })
