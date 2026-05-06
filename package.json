@@ -1,0 +1,51 @@
+{
+  "name": "dolanswap-sdk",
+  "version": "0.1.0",
+  "description": "SDK for interacting with DolanSwap prediction markets on Algorand",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "algosdk": "^3.5.2"
+  },
+  "optionalDependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "algosdk": "^3.5.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.1.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goosealgo/dolanswap-sdk.git"
+  },
+  "keywords": [
+    "algorand",
+    "defi",
+    "prediction",
+    "dolanswap",
+    "sdk"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
