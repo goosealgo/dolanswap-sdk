@@ -45,14 +45,14 @@ describe('DolanPredictionClient — read-only mode', () => {
     expect(client.isRoundBettable(round)).toBe(false)
   })
 
-  it('timeUntilLock works without signer', () => {
+  it('timeUntilLock returns Infinity when lockTime not set', () => {
     const round = makeRound({ lockTime: 0 })
-    expect(client.timeUntilLock(round)).toBe(0)
+    expect(client.timeUntilLock(round)).toBe(Infinity)
   })
 
-  it('timeUntilClose works without signer', () => {
+  it('timeUntilClose returns Infinity when endTime not set', () => {
     const round = makeRound({ endTime: 0 })
-    expect(client.timeUntilClose(round)).toBe(0)
+    expect(client.timeUntilClose(round)).toBe(Infinity)
   })
 })
 
