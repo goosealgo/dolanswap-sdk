@@ -1,6 +1,10 @@
 import algosdk from 'algosdk'
-import { DolanPredictionClient, MIN_BET_MICROALGO } from 'dolanswap-sdk'
+import { DolanPredictionClient } from 'dolanswap-sdk'
 import type { Round } from 'dolanswap-sdk'
+
+// ——— EDIT THESE TO SET YOUR BET SIZE ———
+const MIN_BET_ALGO = 1    // lowest bet per round (in ALGO)
+const MAX_BET_ALGO = 5    // highest bet per round (in ALGO)
 
 const BTC_PREDICTION_APP_ID = 3556490128
 const BTC_ORACLE_APP_ID = 3556487988
@@ -61,8 +65,10 @@ client.on('roundOpened', async (round: Round) => {
 
     log(`Live: $${latestBtcPrice.toFixed(2)} | Oracle: $${oracle.price.toFixed(2)} | Spread: ${spread >= 0 ? '+' : ''}${spread.toFixed(2)} → ${dirLabel}`)
 
-    const txId = await client.placeBet(round.roundId, direction, MIN_BET_MICROALGO)
-    log(`Bet 1 ALGO ${dirLabel} on round ${round.roundId} | TX: ${txId}`)
+    const betAlgo = Math.floor(Math.random() * (MAX_BET_ALGO - MIN_BET_ALGO + 1)) + MIN_BET_ALGO
+    const betMicro = betAlgo * 1_000_000
+    const txId = await client.placeBet(round.roundId, direction, betMicro)
+    log(`Bet ${betAlgo} ALGO ${dirLabel} on round ${round.roundId} | TX: ${txId}`)
   } catch (err) {
     log(`Failed to bet: ${err}`)
   }
